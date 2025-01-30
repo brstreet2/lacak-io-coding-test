@@ -1,6 +1,6 @@
 import { haversineDistance } from "../utils/haversine";
 import { db } from "../utils/db";
-import { geoname } from "@prisma/client";
+import { geoname } from "../../node_modules/.prisma/client";
 
 interface SearchOptions {
   query: string;

@@ -2,7 +2,7 @@ import { Router } from "express";
 import * as Controller from "../controllers/geo";
 import { authenticate } from "../middlewares/auth.middleware";
 import { requireRole } from "../middlewares/requireRole.middleware";
-import { USER_ROLE } from "@prisma/client";
+import { USER_ROLE } from "../../node_modules/.prisma/client";
 
 const routes = Router();
 
