@@ -1,5 +1,6 @@
 import { haversineDistance } from "../utils/haversine";
 import { db } from "../utils/db";
+import { geoname } from "@prisma/client";
 
 interface SearchOptions {
   query: string;
@@ -28,6 +29,14 @@ export interface GeoData {
   modification_date?: Date;
 }
 
+export const findGeoById = async (id: geoname["geonameid"]) => {
+  return db.geoname.findFirst({
+    where: {
+      geonameid: id,
+    },
+  });
+};
+
 export const createGeo = async (data: GeoData) => {
   return db.geoname.create({
     data: {
@@ -49,6 +58,18 @@ export const createGeo = async (data: GeoData) => {
       modification_date: data.modification_date ?? undefined,
       population: data.population,
       timezone: data.timezone ?? undefined,
+      is_approved: false,
+    },
+  });
+};
+
+export const approveGeo = async (id: geoname["geonameid"]) => {
+  return db.geoname.update({
+    where: {
+      geonameid: id,
+    },
+    data: {
+      is_approved: true,
     },
   });
 };
@@ -60,6 +81,7 @@ export const getSuggestions = async ({
 }: SearchOptions) => {
   const results = await db.geoname.findMany({
     where: {
+      is_approved: true,
       OR: [
         { name: { contains: query, mode: "insensitive" } },
         { asciiname: { contains: query, mode: "insensitive" } },

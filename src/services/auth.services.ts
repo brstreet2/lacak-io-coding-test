@@ -90,7 +90,7 @@ export const findUserById = (id: User["id"]) => {
 export const findUserByToken = (token: User["access_token"]) => {
   return db.user.findFirst({
     where: { access_token: token },
-    select: { id: true, email: true },
+    select: { id: true, email: true, role: true },
   });
 };
 

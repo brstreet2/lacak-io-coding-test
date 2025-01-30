@@ -22,6 +22,7 @@ export async function authenticate(
       id: user.id,
       email: user.email,
       token: token,
+      role: user.role,
     };
     next();
   } catch (error) {

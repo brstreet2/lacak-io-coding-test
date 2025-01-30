@@ -1,83 +1,77 @@
-import { createCity } from "../../controllers/geo/createCity";
-import { createGeo } from "../../services/geo.services";
 import { Request, Response } from "express";
+import { createCity } from "../../controllers/geo";
+import { createGeo } from "../../services/geo.services";
 
 jest.mock("../../services/geo.services");
 
-describe("createCity", () => {
+describe("createCity Controller", () => {
   let req: Partial<Request>;
   let res: Partial<Response>;
-  let statusMock: jest.Mock;
-  let jsonMock: jest.Mock;
+  let mockJson: jest.Mock;
+  let mockStatus: jest.Mock;
 
   beforeEach(() => {
-    statusMock = jest.fn().mockReturnThis();
-    jsonMock = jest.fn();
-
-    req = {
-      body: {
-        name: "Test City",
-        latitude: "12.3456",
-        longitude: "78.9012",
-        population: 5000,
-        country_code: "TC",
-      },
-    };
-
-    res = {
-      status: statusMock,
-      json: jsonMock,
-    };
+    mockJson = jest.fn();
+    mockStatus = jest.fn(() => res as Response);
+    req = {};
+    res = { json: mockJson, status: mockStatus };
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it("should create a city successfully", async () => {
-    const mockCity = {
-      id: 1,
-      ...req.body,
+  it("should create a new city when valid data is provided", async () => {
+    const mockGeoData = {
+      name: "New City",
+      population: 1000,
+      country_code: "US",
+      latitude: "37.7749",
+      longitude: "-122.4194",
     };
 
-    (createGeo as jest.Mock).mockResolvedValue(mockCity);
+    (createGeo as jest.Mock).mockResolvedValue(mockGeoData);
+
+    req.body = mockGeoData;
 
     await createCity(req as Request, res as Response);
 
-    expect(createGeo).toHaveBeenCalledWith(req.body);
-    expect(statusMock).toHaveBeenCalledWith(201);
-    expect(jsonMock).toHaveBeenCalledWith({
+    expect(createGeo).toHaveBeenCalledWith(mockGeoData);
+    expect(mockStatus).toHaveBeenCalledWith(201);
+    expect(mockJson).toHaveBeenCalledWith({
       message: "Geo city created successfully",
-      data: mockCity,
+      data: mockGeoData,
     });
   });
 
   it("should return 400 if required fields are missing", async () => {
+    req.body = { name: "City", population: 1000 };
+
+    await createCity(req as Request, res as Response);
+
+    expect(mockStatus).toHaveBeenCalledWith(400);
+    expect(mockJson).toHaveBeenCalledWith({
+      message: "Missing fields: country_code, latitude, longitude",
+    });
+  });
+
+  it("should handle service errors", async () => {
+    (createGeo as jest.Mock).mockRejectedValue(new Error("Service error"));
+
     req.body = {
-      population: 5000,
+      name: "City",
+      population: 1000,
+      country_code: "US",
+      latitude: "37.7749",
+      longitude: "-122.4194",
     };
 
     await createCity(req as Request, res as Response);
 
-    expect(statusMock).toHaveBeenCalledWith(400);
-    expect(jsonMock).toHaveBeenCalledWith({
-      message: "Missing fields: name, country_code, latitude, longitude",
-    });
-    expect(createGeo).not.toHaveBeenCalled();
-  });
-
-  it("should return 500 if createGeo throws an error", async () => {
-    const error = new Error("Database error");
-
-    (createGeo as jest.Mock).mockRejectedValue(error);
-
-    await createCity(req as Request, res as Response);
-
-    expect(createGeo).toHaveBeenCalledWith(req.body);
-    expect(statusMock).toHaveBeenCalledWith(500);
-    expect(jsonMock).toHaveBeenCalledWith({
+    expect(mockStatus).toHaveBeenCalledWith(500);
+    expect(mockJson).toHaveBeenCalledWith({
       message: "Error creating data",
-      error: error.message,
+      error: "Service error",
     });
   });
 });

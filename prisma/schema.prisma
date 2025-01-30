@@ -7,6 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum USER_ROLE {
+  COMMUNITY_MODERATOR
+  CONTRIBUTOR
+}
+
 model RefreshToken {
   id          String   @id @default(cuid())
   hashedToken String   @unique
@@ -25,6 +30,7 @@ model User {
   password     String?
   access_token String?
   refreshToken RefreshToken[]
+  role         USER_ROLE      @default(CONTRIBUTOR)
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 
@@ -51,4 +57,5 @@ model geoname {
   dem               Int?
   timezone          String?   @db.VarChar(40)
   modification_date DateTime? @db.Date
+  is_approved       Boolean   @default(true)
 }

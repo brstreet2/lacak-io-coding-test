@@ -19,7 +19,6 @@ export async function getCitySuggestions(req: Request, res: Response) {
 
     return res.json({ suggestions });
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ error: "Something wrong with the server." });
   }
 }
