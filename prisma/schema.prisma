@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model RefreshToken {
+  id          String   @id @default(cuid())
+  hashedToken String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  revoked     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("refresh_tokens")
+}
+
+model User {
+  id           String         @id @default(cuid())
+  email        String         @unique @default("")
+  password     String?
+  access_token String?
+  refreshToken RefreshToken[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@map("users")
+}
+
+model geoname {
+  geonameid         Int       @id @default(autoincrement())
+  name              String    @db.VarChar(200)
+  asciiname         String?   @db.VarChar(200)
+  alternatenames    String?   @db.VarChar(5000)
+  latitude          Float
+  longitude         Float
+  feature_class     String?   @db.Char(1)
+  feature_code      String?   @db.VarChar(10)
+  country_code      String?   @db.Char(2)
+  cc2               String?   @db.VarChar(60)
+  admin1_code       String?   @db.VarChar(20)
+  admin2_code       String?   @db.VarChar(80)
+  admin3_code       String?   @db.VarChar(20)
+  admin4_code       String?   @db.VarChar(20)
+  population        Int?
+  elevation         Int?
+  dem               Int?
+  timezone          String?   @db.VarChar(40)
+  modification_date DateTime? @db.Date
+}
