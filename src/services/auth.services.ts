@@ -1,4 +1,4 @@
-import { User } from "../../node_modules/.prisma/client";
+import { User } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { db } from "../utils/db";
 import { hasToken } from "../utils/hasToken";
